@@ -45,9 +45,15 @@ fn main() -> anyhow::Result<()> {
         ensure!(
             !args.output_path.try_exists()?,
             "'{}' already exists. Use --force to overwrite.",
-            args.output_path.display()
+            args.output_path.display(),
+        );
+    } else {
+        ensure!(
+            args.input_path.canonicalize()? != args.output_path.canonicalize()?,
+            "Output path cannot be the same as input path.",
         );
     }
+
 
     let ffprobe_args = [
         args.input_path
