@@ -41,19 +41,24 @@ fn main() -> anyhow::Result<()> {
         args.input_path.display(),
     );
 
-    if !args.force {
+    if args.force {
+        if args.output_path.is_file() {
+            ensure!(
+                !args
+                .input_path
+                .canonicalize()?
+                .as_os_str()
+                .eq_ignore_ascii_case(args.output_path.canonicalize()?),
+                "Output path cannot be the same as input path.",
+            );
+        }
+    } else {
         ensure!(
             !args.output_path.try_exists()?,
             "'{}' already exists. Use --force to overwrite.",
             args.output_path.display(),
         );
-    } else {
-        ensure!(
-            args.input_path.canonicalize()? != args.output_path.canonicalize()?,
-            "Output path cannot be the same as input path.",
-        );
     }
-
 
     let ffprobe_args = [
         args.input_path
